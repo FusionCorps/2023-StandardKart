@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -34,12 +35,31 @@ public class Chassis extends SubsystemBase {
         drive_fl.setNeutralMode(NeutralMode.Brake);
         drive_fr.setNeutralMode(NeutralMode.Brake);
 
+        drive_bl.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30, 35, 0.5));
+        drive_br.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30, 35, 0.5));
+        drive_fl.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30, 35, 0.5));
+        drive_fr.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30, 35, 0.5));
+
+
         diff_drive = new DifferentialDrive(drive_fl, drive_fr);
 
     }
 
     public void curvatureDrive(double fwd, double rot) {
         diff_drive.curvatureDrive(fwd, rot, true);
+    }
+
+    public void setDriveVolts(double left, double right) {
+        drive_fl.setVoltage(left);
+        drive_bl.setVoltage(left);
+
+        drive_fr.setVoltage(right);
+        drive_br.setVoltage(right);
+    }
+
+    @Override
+    public void periodic() {
+        diff_drive.feed();
     }
 
 }
