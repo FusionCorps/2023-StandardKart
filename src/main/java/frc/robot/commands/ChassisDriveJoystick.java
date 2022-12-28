@@ -22,7 +22,7 @@ public class ChassisDriveJoystick extends CommandBase {
 
     @Override
     public void execute() {
-        m_chassis.curvatureDrive(-fwd_limiter.calculate(m_controller.getRawAxis(1)), rot_limiter.calculate(-0.5*m_controller.getRawAxis(0)));
+        m_chassis.curvatureDrive(-fwd_limiter.calculate(m_controller.getRawAxis(1)), rot_limiter.calculate(0.5*m_controller.getRawAxis(0)));
     }
 
     @Override

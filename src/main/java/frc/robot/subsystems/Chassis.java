@@ -6,8 +6,10 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
@@ -42,7 +44,7 @@ public class Chassis extends SubsystemBase {
             2.1, // insert moment of inertia here
             26.5, // insert mass of robot here
             Units.inchesToMeters(kWheelRadiusInches),
-            0.546, //wheel distance
+            kTrackwidthMeters, //wheel distance
             null
     );
 
@@ -100,14 +102,14 @@ public class Chassis extends SubsystemBase {
         drive_br.setVoltage(right);
     }
 
+    public Pose2d getPose() {
+        return m_odometry.getPoseMeters();
+    }
+
     @Override
     public void periodic() {
         diff_drive.feed();
 
-        m_odometry.update(gyro.getRotation2d(),
-                nativeUnitsToDistanceMeters(drive_fl.getSelectedSensorPosition()),
-                nativeUnitsToDistanceMeters(drive_fr.getSelectedSensorPosition()));
-        field.setRobotPose(m_odometry.getPoseMeters());
     }
 
     @Override
@@ -142,6 +144,11 @@ public class Chassis extends SubsystemBase {
                 ));
 
         angle.set(drive_sim.getHeading().getDegrees());
+
+        m_odometry.update(drive_sim.getHeading(),
+                nativeUnitsToDistanceMeters(drive_fl.getSelectedSensorPosition()),
+                nativeUnitsToDistanceMeters(drive_fr.getSelectedSensorPosition()));
+        field.setRobotPose(m_odometry.getPoseMeters());
     }
 
     private int distanceToNativeUnits(double positionMeters){
@@ -164,6 +171,11 @@ public class Chassis extends SubsystemBase {
         double wheelRotations = motorRotations / kGearRatio;
         double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(kWheelRadiusInches));
         return positionMeters;
+    }
+
+    public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+        return new DifferentialDriveWheelSpeeds(drive_fl.getSelectedSensorVelocity()*Constants.kEncoderDistancePerPulse,
+                drive_fr.getSelectedSensorVelocity()*Constants.kEncoderDistancePerPulse);
     }
 
 }
