@@ -19,4 +19,9 @@ public final class Constants {
     public static int DRIVE_TALON_FL_ID = 2;
     public static int DRIVE_TALON_FR_ID = 1;
 
+    public static int kCountsPerRev = 2048;  //Encoder counts per revolution of the motor shaft.
+    public static double kGearRatio = 10.71;
+    public static double kWheelRadiusInches = 4;
+    public static int k100msPerSecond = 10;
+
 }
