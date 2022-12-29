@@ -23,7 +23,7 @@ public class PathFollower extends SequentialCommandGroup {
 
     RamseteCommand ramseteCommand;
 
-    public PathFollower(Chassis chassis) {
+    public PathFollower(Chassis chassis, Trajectory trajectory) {
         mChassis = chassis;
 
         addRequirements(mChassis);
@@ -48,20 +48,20 @@ public class PathFollower extends SequentialCommandGroup {
                         .addConstraint(autoVoltageConstraint);
 
         // An example trajectory to follow.  All units in meters.
-        Trajectory exampleTrajectory =
-                TrajectoryGenerator.generateTrajectory(
-                        // Start at the origin facing the +X direction
-                        new Pose2d(0, 0, new Rotation2d(0)),
-                        // Pass through these two interior waypoints, making an 's' curve path
-                        List.of(new Translation2d(1, 0), new Translation2d(2, 0)),
-                        // End 3 meters straight ahead of where we started, facing forward
-                        new Pose2d(3, 0, new Rotation2d(0)),
-                        // Pass config
-                        config);
+//        Trajectory exampleTrajectory =
+//                TrajectoryGenerator.generateTrajectory(
+//                        // Start at the origin facing the +X direction
+//                        new Pose2d(0, 0, new Rotation2d(0)),
+//                        // Pass through these two interior waypoints, making an 's' curve path
+//                        List.of(new Translation2d(1, 0), new Translation2d(2, 0)),
+//                        // End 3 meters straight ahead of where we started, facing forward
+//                        new Pose2d(3, 0, new Rotation2d(0)),
+//                        // Pass config
+//                        config);
 
         ramseteCommand =
                 new RamseteCommand(
-                        exampleTrajectory,
+                        trajectory,
                         mChassis::getPose,
                         new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
                         new SimpleMotorFeedforward(
@@ -75,6 +75,8 @@ public class PathFollower extends SequentialCommandGroup {
                         // RamseteCommand passes volts to the callback
                         mChassis::setDriveVolts,
                         mChassis);
+
+        mChassis.setOdometry(trajectory.getInitialPose());
 
         addCommands(ramseteCommand);
 

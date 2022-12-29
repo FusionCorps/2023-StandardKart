@@ -178,4 +178,8 @@ public class Chassis extends SubsystemBase {
                 drive_fr.getSelectedSensorVelocity()*Constants.kEncoderDistancePerPulse);
     }
 
+    public void setOdometry(Pose2d odometry) {
+        m_odometry.resetPosition(odometry, gyro.getRotation2d());
+    }
+
 }

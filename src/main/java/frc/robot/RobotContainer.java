@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -15,6 +19,9 @@ import frc.robot.commands.PathFollower;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -30,7 +37,14 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Chassis m_chassis = new Chassis();
 
-  private final SequentialCommandGroup m_autoCommand = new PathFollower(m_chassis);
+  String trajectoryJSON = "paths/Leg1.wpilib.json";
+
+  String leg2JSON = "paths/Leg2.wpilib.json";
+  String leg3JSON = "paths/Leg3.wpilib.json";
+  String leg4JSON = "paths/Leg4.wpilib.json";
+  String leg5JSON = "paths/Leg5.wpilib.json";
+
+  Trajectory trajectory = new Trajectory();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -38,6 +52,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     m_chassis.setDefaultCommand(new ChassisDriveJoystick(m_chassis, m_controller));
+
 
   }
 
@@ -59,6 +74,29 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+
+    try {
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+      Trajectory trajectory1 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(leg2JSON);
+      Trajectory trajectory2 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(leg3JSON);
+      Trajectory trajectory3 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(leg4JSON);
+      Trajectory trajectory4 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+      trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(leg5JSON);
+      Trajectory trajectory5 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
+      trajectory = trajectory1.concatenate(trajectory2.concatenate(trajectory3.concatenate(trajectory4.concatenate(trajectory5))));
+
+    } catch (IOException ex) {
+      DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+    }
+
+    return new PathFollower(m_chassis, trajectory);
   }
 }
